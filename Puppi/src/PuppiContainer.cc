@@ -133,7 +133,8 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       if(fPFParticles[i0].user_index() == 2 && fApplyCHS ) pWeight = 1;
       if(fPFParticles[i0].user_index() == 3 && fApplyCHS ) pWeight = 0;
       //Basic Weight Checks
-      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- " << fVals[i0] << " -- " << lNAlgos << std::endl;
+      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos 
+					<< std::endl;
       //if(isnan(pWeight)) continue;
       //Basic Cuts      
       if(pWeight                         < fPuppiWeightCut) pWeight = 0;  //==> Elminate the low Weight stuff

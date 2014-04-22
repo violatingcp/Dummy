@@ -40,9 +40,9 @@ PuppiAlgo::~PuppiAlgo() {
 void PuppiAlgo::reset() { 
   fPups.clear();
   for(unsigned int i0 = 0; i0 < fNAlgos; i0++) { 
-    fMedian[i0] = -1; 
-    fRMS   [i0] = -1;
-    fMean  [i0] = -1;
+    fMedian[i0] =  0; 
+    fRMS   [i0] =  0;
+    fMean  [i0] =  0;
     fNCount[i0] =  0;
   }
 }
