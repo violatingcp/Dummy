@@ -53,6 +53,7 @@ void PuppiContainer::getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iConsti
     double pVal = -1;
     //Calculate the Puppi Algo to use
     int  pPupId   = getPuppiId(iConstits[i0].pt(),iConstits[i0].eta());
+    if(fPuppiAlgo[pPupId].numAlgos() <= iOpt) pPupId = -1;
     if(pPupId == -1) {fVals.push_back(-1); continue;}
     //Get the Puppi Sub Algo (given iteration)
     int  pAlgo    = fPuppiAlgo[pPupId].algoId   (iOpt); 
@@ -78,6 +79,7 @@ int    PuppiContainer::getPuppiId(const float &iPt,const float &iEta) {
     lId = i0; 
     break;
   }
+  //if(lId == -1) std::cerr << "Error : Full fiducial range is not defined " << std::endl;
   return lId;
 }
 double PuppiContainer::getChi2FromdZ(double iDZ) { 
@@ -106,10 +108,16 @@ const std::vector<double> PuppiContainer::puppiWeights() {
     }
     std::vector<double> pVals;
     for(int i0 = 0; i0 < lNParticles; i0++) {
+      //Refresh
       pVals.clear();
-      int  pPupId   = getPuppiId(fRecoParticles[i0].pt,fRecoParticles[i0].eta);
-      // fill the p-values
       double pWeight = 1;
+      //Get the Puppi Id and if ill defined move on
+      int  pPupId   = getPuppiId(fRecoParticles[i0].pt,fRecoParticles[i0].eta);
+      if(pPupId == -1) {
+	fWeights .push_back(pWeight);
+	continue;
+      }
+      // fill the p-values
       double pChi2   = 0;
       if(fUseDZ){ 
 	//Compute an Experimental Puppi Weight with delta Z info (very simple example)
@@ -119,13 +127,13 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       }
       //Fill and compute the PuppiWeight
       int lNAlgos = fPuppiAlgo[pPupId].numAlgos();
-      for(int i1 = 0; i1 < lNAlgos; i1++) pVals.push_back(pVals[lNParticles*i1]);
+      for(int i1 = 0; i1 < lNAlgos; i1++) pVals.push_back(fVals[lNParticles*i1+i0]);
       pWeight = fPuppiAlgo[pPupId].compute(pVals,pChi2);
       //Apply the CHS weights
       if(fPFParticles[i0].user_index() == 2 && fApplyCHS ) pWeight = 1;
       if(fPFParticles[i0].user_index() == 3 && fApplyCHS ) pWeight = 0;
       //Basic Weight Checks
-      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << std::endl;
+      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- " << fVals[i0] << " -- " << lNAlgos << std::endl;
       //if(isnan(pWeight)) continue;
       //Basic Cuts      
       if(pWeight                         < fPuppiWeightCut) pWeight = 0;  //==> Elminate the low Weight stuff

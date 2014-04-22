@@ -48,15 +48,15 @@ puppi = cms.EDProducer("PuppiProducer",
                          puppiAlgos = puppiCentral
                         ),
                         cms.PSet( 
-                         etaMin = cms.untracked.double(-5.),
+                         etaMin = cms.untracked.double(-10.),
                          etaMax = cms.untracked.double(-2.5),
-                         ptMin  = cms.untracked.double(-1.),
+                         ptMin  = cms.untracked.double(1.),
                          puppiAlgos = puppiForward
                         ),
                         cms.PSet( 
                          etaMin = cms.untracked.double(2.5),
-                         etaMax = cms.untracked.double(5.0),
-                         ptMin  = cms.untracked.double(-1.),
+                         etaMax = cms.untracked.double(10.0),
+                         ptMin  = cms.untracked.double(1.),
                          puppiAlgos = puppiForward
                         )
                        )

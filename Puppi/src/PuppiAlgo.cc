@@ -53,6 +53,7 @@ void PuppiAlgo::add(const fastjet::PseudoJet &iParticle,const double &iVal,const
   fNCount[iAlgo]++;
 }
 void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo) { 
+  if(iAlgo >= fNAlgos) return;
   int lNBefore = 0; 
   for(unsigned int i0 = 0; i0 < iAlgo; i0++) lNBefore += fNCount[i0];
   int lNHalfway = lNBefore + int( double( fNCount[iAlgo] )/2.);
@@ -69,8 +70,8 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo) {
 }
 //This code is probably a bit confusing
 double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) { 
-  double lVal  = 0;
-  double lPVal = 1;
+  double lVal  = 0.;
+  double lPVal = 1.;
   int    lNDOF = 0; 
   for(unsigned int i0 = 0; i0 < fNAlgos; i0++) { 
     if(fCombId[i0] == 1 && i0 > 0) {  //Compute the previous p-value so that p-values can be multiplieed
@@ -80,9 +81,10 @@ double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) {
       lVal  = 0; 
     }
     lNDOF++;
-    //Special Check for any algo with log(0) 
     double pVal = iVals[i0];
+    //Special Check for any algo with log(0) 
     if(fAlgoId[i0] == 0 && iVals[i0] == 0) pVal = fMedian[i0];
+    if(fAlgoId[i0] == 3 && iVals[i0] == 0) pVal = fMedian[i0];
     lVal += (pVal-fMedian[i0])*(fabs(pVal-fMedian[i0]))/fRMS[i0]/fRMS[i0];
     if(i0 == 0 && iChi2 != 0) lNDOF++;      //Add external Chi2 to first element
     if(i0 == 0 && iChi2 != 0) lVal+=iChi2;  //Add external Chi2 to first element
