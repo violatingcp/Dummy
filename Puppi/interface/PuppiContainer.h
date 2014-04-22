@@ -1,0 +1,46 @@
+#ifndef DUMMY_PUPPI_PUPPICONTAINER_H_
+#define DUMMY_PUPPI_PUPPICONTAINER_H_
+
+#include "Dummy/Puppi/interface/PuppiAlgo.h"
+#include "Dummy/Puppi/interface/NoTrees.hh"
+#include "Dummy/Puppi/interface/RecoObj.hh"
+#include "fastjet/internal/base.hh"
+#include "fastjet/PseudoJet.hh"
+
+using namespace std;
+using namespace fastjet;
+
+//FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
+
+//......................
+class PuppiContainer{
+public:
+    PuppiContainer(const edm::ParameterSet &iConfig);
+    ~PuppiContainer(); 
+    void initialize(const std::vector<RecoObj> &iRecoObjects);
+    std::vector<fastjet::PseudoJet> pfParticles(){ return fPFParticles; }    
+    std::vector<fastjet::PseudoJet> pvParticles(){ return fChargedPV; }        
+    const std::vector<double> puppiWeights();
+    std::vector<fastjet::PseudoJet> puppiParticles() { return fPupParticles;}
+
+protected:
+    double  goodVar      (PseudoJet &iPart,std::vector<PseudoJet> &iParts, int iOpt,double iRCone);
+    void    getRMSAvg    (int iOpt,std::vector<fastjet::PseudoJet> &iConstits,std::vector<fastjet::PseudoJet> &iParticles,std::vector<fastjet::PseudoJet> &iChargeParticles);
+    double  getChi2FromdZ(double iDZ);
+    int     getPuppiId   (const float &iPt,const float &iEta);
+  
+    std::vector<RecoObj>   fRecoParticles;
+    std::vector<PseudoJet> fPFParticles;
+    std::vector<PseudoJet> fChargedPV;
+    std::vector<PseudoJet> fPupParticles;
+    std::vector<double>    fWeights;
+    std::vector<double>    fVals;
+    bool   fApplyCHS;
+    bool   fUseDZ;
+    double fNeutralMinPt;
+    double fPuppiWeightCut;
+    int    fNAlgos;
+    std::vector<PuppiAlgo> fPuppiAlgo;
+};
+#endif
+
