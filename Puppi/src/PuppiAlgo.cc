@@ -5,19 +5,19 @@
 #include "TMath.h"
 
 PuppiAlgo::PuppiAlgo(edm::ParameterSet &iConfig) { 
-  fEtaMin  = iConfig.getParameter<double>("etaMin");
-  fEtaMax  = iConfig.getParameter<double>("etaMax");
-  fPtMin   = iConfig.getParameter<double>("ptMin");
+  fEtaMin  = iConfig.getUntrackedParameter<double>("etaMin");
+  fEtaMax  = iConfig.getUntrackedParameter<double>("etaMax");
+  fPtMin   = iConfig.getUntrackedParameter<double>("ptMin");
   std::vector<edm::ParameterSet> lAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("puppiAlgos"); 
   fNAlgos = lAlgos.size();
   //Uber Configurable Puppi 
   for(unsigned int i0 = 0; i0 < lAlgos.size(); i0++)  { 
-    int    pAlgoId   = lAlgos[i0].getParameter<int > ("algoId");
-    bool   pCharged  = lAlgos[i0].getParameter<bool> ("useCharged");
-    int    pComb     = lAlgos[i0].getParameter<int>  ("combOpt");    // 0=> add in chi2/1=>Multiply p-values
-    double pConeSize = lAlgos[i0].getParameter<double>("cone");   // Min Pt when computing pt and rms
-    double pRMSPtMin = lAlgos[i0].getParameter<double>("rmsPtMin");   // Min Pt when computing pt and rms
-    double pRMSSF    = lAlgos[i0].getParameter<double>("rmsScaleFactor");   // Additional Tuning parameter for Jokers
+    int    pAlgoId   = lAlgos[i0].getUntrackedParameter<int > ("algoId");
+    bool   pCharged  = lAlgos[i0].getUntrackedParameter<bool> ("useCharged");
+    int    pComb     = lAlgos[i0].getUntrackedParameter<int>  ("combOpt");    // 0=> add in chi2/1=>Multiply p-values
+    double pConeSize = lAlgos[i0].getUntrackedParameter<double>("cone");   // Min Pt when computing pt and rms
+    double pRMSPtMin = lAlgos[i0].getUntrackedParameter<double>("rmsPtMin");   // Min Pt when computing pt and rms
+    double pRMSSF    = lAlgos[i0].getUntrackedParameter<double>("rmsScaleFactor");   // Additional Tuning parameter for Jokers
     fAlgoId        .push_back(pAlgoId);
     fCharged       .push_back(pCharged);
     fCombId        .push_back(pComb);

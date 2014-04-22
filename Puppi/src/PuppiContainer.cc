@@ -6,10 +6,10 @@
 #include <math.h>
 
 PuppiContainer::PuppiContainer(const edm::ParameterSet &iConfig) {
-  fApplyCHS        = iConfig.getParameter<bool>("applyCHS"); 
-  fUseDZ           = iConfig.getParameter<bool>("useDZ");
-  fNeutralMinPt    = iConfig.getParameter<double>("MinNeutralPt");
-  fPuppiWeightCut  = iConfig.getParameter<double>("MinPuppiWeight");
+  fApplyCHS        = iConfig.getUntrackedParameter<bool>("applyCHS"); 
+  fUseDZ           = iConfig.getUntrackedParameter<bool>("useDZ");
+  fNeutralMinPt    = iConfig.getUntrackedParameter<double>("MinNeutralPt");
+  fPuppiWeightCut  = iConfig.getUntrackedParameter<double>("MinPuppiWeight");
   std::vector<edm::ParameterSet> lAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("algos"); 
   fNAlgos = lAlgos.size();
   for(unsigned int i0 = 0; i0 < lAlgos.size(); i0++) { 

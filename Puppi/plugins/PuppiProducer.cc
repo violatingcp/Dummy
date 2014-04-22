@@ -21,9 +21,9 @@
 
 // ------------------------------------------------------------------------------------------
 PuppiProducer::PuppiProducer(const edm::ParameterSet& iConfig) {
-  fPuppiName = iConfig.getParameter<std::string>("PuppiName");
-  fUseDZ     = iConfig.getParameter<bool>("UseDeltaZCut");
-  fDZCut     = iConfig.getParameter<bool>("DeltaZCut");
+  fPuppiName = iConfig.getUntrackedParameter<std::string>("PuppiName");
+  fUseDZ     = iConfig.getUntrackedParameter<bool>("UseDeltaZCut");
+  fDZCut     = iConfig.getUntrackedParameter<double>("DeltaZCut");
   fPuppiContainer = new PuppiContainer(iConfig);
   fPFName    = iConfig.getUntrackedParameter<std::string>("candName"  ,"particleFlow");
   fPVName    = iConfig.getUntrackedParameter<std::string>("vertexName","offlinePrimaryVertices");
