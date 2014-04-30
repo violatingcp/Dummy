@@ -36,7 +36,7 @@ protected:
     std::vector<double>    fWeights;
     std::vector<double>    fVals;
     bool   fApplyCHS;
-    bool   fUseDZ;
+    bool   fUseExp;
     double fNeutralMinPt;
     double fPuppiWeightCut;
     int    fNAlgos;

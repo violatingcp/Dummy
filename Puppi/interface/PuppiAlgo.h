@@ -28,8 +28,10 @@ private:
   float fEtaMin;
   float fPtMin ;
   std::vector<float>  fPups;
+  std::vector<float>  fPupsPV;
   std::vector<int>    fAlgoId;
   std::vector<bool>   fCharged;
+  std::vector<bool>   fAdjust;
   std::vector<int>    fCombId;
   std::vector<double> fConeSize;
   std::vector<double> fRMSPtMin;

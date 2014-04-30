@@ -7,7 +7,7 @@
 
 PuppiContainer::PuppiContainer(const edm::ParameterSet &iConfig) {
   fApplyCHS        = iConfig.getUntrackedParameter<bool>("applyCHS"); 
-  fUseDZ           = iConfig.getUntrackedParameter<bool>("useDZ");
+  fUseExp           = iConfig.getUntrackedParameter<bool>("useExp");
   fNeutralMinPt    = iConfig.getUntrackedParameter<double>("MinNeutralPt");
   fPuppiWeightCut  = iConfig.getUntrackedParameter<double>("MinPuppiWeight");
   std::vector<edm::ParameterSet> lAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("algos"); 
@@ -85,7 +85,9 @@ int    PuppiContainer::getPuppiId(const float &iPt,const float &iEta) {
 double PuppiContainer::getChi2FromdZ(double iDZ) { 
   //We need to obtain prob of PU + (1-Prob of LV)
   // Prob(LV) = Gaus(dZ,sigma) where sigma = 1.5mm  (its really more like 1mm)
-  double lProbLV = ROOT::Math::normal_cdf_c(fabs(iDZ),0.2)*2.; //*2 is to do it double sided
+  //double lProbLV = ROOT::Math::normal_cdf_c(fabs(iDZ),0.2)*2.; //*2 is to do it double sided
+  //Take iDZ to be corrected by sigma already
+  double lProbLV = ROOT::Math::normal_cdf_c(fabs(iDZ),1.)*2.; //*2 is to do it double sided
   double lProbPU = 1-lProbLV;
   if(lProbPU <= 0) lProbPU = 1e-16;   //Quick Trick to through out infs
   if(lProbPU >= 0) lProbPU = 1-1e-16; //Ditto
@@ -119,7 +121,7 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       }
       // fill the p-values
       double pChi2   = 0;
-      if(fUseDZ){ 
+      if(fUseExp){ 
 	//Compute an Experimental Puppi Weight with delta Z info (very simple example)
 	pChi2 = getChi2FromdZ(fRecoParticles[i0].dZ);
 	//Now make sure Neutrals are not set

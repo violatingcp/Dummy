@@ -234,12 +234,13 @@ PseudoJet flow_within_R(const vector<PseudoJet> & particles, const PseudoJet& ce
    return flow;
 }
 double var_within_R(int iId, const vector<PseudoJet> & particles, const PseudoJet& centre, double R){
+  if(iId == -1) return 1;
   fastjet::Selector sel = fastjet::SelectorCircle(R);
   sel.set_reference(centre);
   vector<PseudoJet> near_particles = sel(particles);
   double var = 0;
-  double lSumPt = 0;
-  if(iId == 1) for(unsigned int i=0; i<near_particles.size(); i++) lSumPt += near_particles[i].pt();
+  //double lSumPt = 0;
+  //if(iId == 1) for(unsigned int i=0; i<near_particles.size(); i++) lSumPt += near_particles[i].pt();
   for(unsigned int i=0; i<near_particles.size(); i++){
     double pDEta = near_particles[i].eta()-centre.eta();
     double pDPhi = fabs(near_particles[i].phi()-centre.phi());
