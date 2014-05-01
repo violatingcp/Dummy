@@ -4,7 +4,7 @@ puppiCentral = cms.VPSet(
                  cms.PSet(
                   algoId           = cms.untracked.int32(0),  #0 is default Puppi
                   useCharged       = cms.untracked.bool(True),
-                  applyMedianShift = cms.untracked.bool(True),
+                  applyLowPUCorr   = cms.untracked.bool(True),
                   combOpt          = cms.untracked.int32(0),
                   cone             = cms.untracked.double(0.2),
                   rmsPtMin         = cms.untracked.double(0.5),
@@ -16,7 +16,7 @@ puppiForward = cms.VPSet(
                 cms.PSet(
                  algoId         = cms.untracked.int32(0),  #0 is default Puppi
                  useCharged     = cms.untracked.bool(False),
-                 applyMedianShift = cms.untracked.bool(False),
+                 applyLowPUCorr = cms.untracked.bool(True),
                  combOpt        = cms.untracked.int32(0),
                  cone           = cms.untracked.double(0.2),
                  rmsPtMin       = cms.untracked.double(0.5),
@@ -25,11 +25,11 @@ puppiForward = cms.VPSet(
                 cms.PSet(
                  algoId         = cms.untracked.int32(1),  #0 is default Puppi
                  useCharged     = cms.untracked.bool(False),
-                 applyMedianShift = cms.untracked.bool(False),
-                 combOpt        = cms.untracked.int32(1),
+                 applyLowPUCorr = cms.untracked.bool(True),
+                 combOpt        = cms.untracked.int32(0),
                  cone           = cms.untracked.double(0.2),
                  rmsPtMin       = cms.untracked.double(0.5),
-                 rmsScaleFactor = cms.untracked.double(1.)
+                 rmsScaleFactor = cms.untracked.double(1.0)
                  )
                 )
 

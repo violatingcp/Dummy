@@ -10,7 +10,7 @@ public:
   //Computing Mean and RMS
   void   reset();
   void   add(const fastjet::PseudoJet &iParticle,const double &iVal,const unsigned int iAlgo);
-  void   computeMedRMS(const unsigned int &iAlgo);
+  void   computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac);
   //Get the Weight
   double compute(std::vector<double> &iVals,double iChi2);
   //Helpers

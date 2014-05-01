@@ -31,22 +31,22 @@ process.load('BaconProd/Ntupler/myJetExtras09_cff')    #include gen jets and b-t
 process.load('BaconProd/Ntupler/myMETFilters_cff')   # apply MET filters set to tagging mode
 process.load('BaconProd/Ntupler/myMVAMet_cff')
 
-process.AK4PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK4caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
-process.AK5PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK5caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
-process.AK6PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK6caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
-process.AK7PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK7caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
-process.AK8PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK8caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
-process.AK9PFJets.src         = cms.InputTag('puppi','Puppi')
-process.AK9caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK4PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK4caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK5PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK5caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK6PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK6caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK7PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK7caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK8PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK8caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
+#process.AK9PFJets.src         = cms.InputTag('puppi','Puppi')
+#process.AK9caPFJetsPruned.src = cms.InputTag('puppi','Puppi')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames  = cms.untracked.vstring('/store/relval/CMSSW_7_1_0_pre5/RelValTTbar_13/GEN-SIM-RECO/PU50ns_POSTLS171_V2-v2/00000/4CCC03AC-BDBC-E311-8597-02163E00EA7F.root')
+                            fileNames  = cms.untracked.vstring('/store/relval/CMSSW_7_1_0_pre5/RelValTTbar_13/GEN-SIM-RECO/POSTLS171_V1-v1//00000/3E806F9A-4BB6-E311-A4D2-002618943935.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -75,7 +75,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   genEventInfoName = cms.untracked.string('generator'),
   genParticlesName = cms.untracked.string('genParticles'),
   fillAllGen                 = cms.untracked.bool(False),                               
-  pflowCandidatesName        = cms.untracked.InputTag('puppi','Puppi'),
+  pflowCandidatesName        = cms.untracked.InputTag('particleFlow'),#puppi','Puppi'),
   primaryVerticesName        = cms.untracked.string('offlinePrimaryVertices'),
   beamspotName               = cms.untracked.string('offlineBeamSpot'),
   pileupInfoName             = cms.untracked.string('addPileupInfo'),
@@ -112,7 +112,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 )
 
 process.baconSequence = cms.Sequence(
-                                     process.puppi*
+#                                     process.puppi*
 #                                     process.pfMetPuppi)
                                      process.metFilters*
                                      process.recojetsequence*

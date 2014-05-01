@@ -15,7 +15,7 @@ PuppiAlgo::PuppiAlgo(edm::ParameterSet &iConfig) {
   for(unsigned int i0 = 0; i0 < lAlgos.size(); i0++)  { 
     int    pAlgoId      = lAlgos[i0].getUntrackedParameter<int > ("algoId");
     bool   pCharged     = lAlgos[i0].getUntrackedParameter<bool> ("useCharged");
-    bool   pWeight0     = lAlgos[i0].getUntrackedParameter<bool> ("applyMedianShift");
+    bool   pWeight0     = lAlgos[i0].getUntrackedParameter<bool> ("applyLowPUCorr");
     int    pComb        = lAlgos[i0].getUntrackedParameter<int>  ("combOpt");    // 0=> add in chi2/1=>Multiply p-values
     double pConeSize    = lAlgos[i0].getUntrackedParameter<double>("cone");   // Min Pt when computing pt and rms
     double pRMSPtMin    = lAlgos[i0].getUntrackedParameter<double>("rmsPtMin");   // Min Pt when computing pt and rms
@@ -59,27 +59,38 @@ void PuppiAlgo::add(const fastjet::PseudoJet &iParticle,const double &iVal,const
   fPups.push_back(iVal);
   fNCount[iAlgo]++;
 }
-void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo) { 
+void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) { 
   if(iAlgo >= fNAlgos) return;
   int lNBefore = 0; 
   for(unsigned int i0 = 0; i0 < iAlgo; i0++) lNBefore += fNCount[i0];
   std::sort(fPups.begin()+lNBefore,fPups.begin()+lNBefore+fNCount[iAlgo]);
-  int lNHalfway = lNBefore + int( double( fNCount[iAlgo] )*0.50);
+  double lCorr = 1.;
+  if(!fCharged[iAlgo] && fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
+
+  int lNHalfway = lNBefore + int( double( fNCount[iAlgo] )*0.50*lCorr);
   fMedian[iAlgo] = fPups[lNHalfway];
   double lMed = fMedian[iAlgo];  //Just to make the readability easier
+
+  int lNRMS = 0; 
   for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) {
     fMean[iAlgo] += fPups[i0];
+    if(!fCharged[iAlgo] && fAdjust[iAlgo] && fPups[i0] > lMed) continue;
+    lNRMS++;
     fRMS [iAlgo] += (fPups[i0]-lMed)*(fPups[i0]-lMed);
   }
-  std::sort(fPupsPV.begin(),fPupsPV.end());
-  int lNPV = 0; for(unsigned int i0 = 0; i0 < fPupsPV.size(); i0++) if(fPupsPV[i0] <= lMed ) lNPV++; 
   fMean[iAlgo]/=fNCount[iAlgo];
-  fRMS [iAlgo]/=fNCount[iAlgo];
+  if(lNRMS > 0) fRMS [iAlgo]/=lNRMS;
+  if(fRMS[iAlgo] == 0) fRMS[iAlgo] = 1e-5;
+
   fRMS [iAlgo] = sqrt(fRMS[iAlgo]);
   fRMS [iAlgo] *= fRMSScaleFactor[iAlgo];
-  //if(fCharged[iAlgo]) std::cout << "Median : " << fMedian[iAlgo] << " +/- " << fRMS[iAlgo]  << " -- Begin : " << lNBefore << " -- Total :  " << fNCount[iAlgo] << " -- 50% " << lNHalfway  << " Fraction less than @ Median : " << (float(lNPV)/float(fPupsPV.size()+fNCount[iAlgo])) << std::endl;
+  if(!fCharged[iAlgo]) std::cout << " Process : " << iAlgo  << " Median : " << fMedian[iAlgo] << " +/- " << fRMS[iAlgo]  << " -- Begin : " << lNBefore << " -- Total :  " << fNCount[iAlgo] << " -- 50% " << lNHalfway  << " Fraction less than @ Median : " << std::endl;
+  if(!fAdjust[iAlgo]) return;
+  //Adjust the p-value to correspond to the median
+  std::sort(fPupsPV.begin(),fPupsPV.end());
+  int lNPV = 0; for(unsigned int i0 = 0; i0 < fPupsPV.size(); i0++) if(fPupsPV[i0] <= lMed ) lNPV++; 
   double lAdjust = 2.*double(lNPV)/double(fPupsPV.size()+fNCount[iAlgo]);
-  if(lAdjust > 0 && fAdjust[iAlgo]) fMedian[iAlgo] -= sqrt(ROOT::Math::chisquared_quantile(lAdjust,1.)*fRMS[iAlgo]);
+  if(lAdjust > 0) fMedian[iAlgo] -= sqrt(ROOT::Math::chisquared_quantile(lAdjust,1.)*fRMS[iAlgo]);
 }
 //This code is probably a bit confusing
 double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) { 

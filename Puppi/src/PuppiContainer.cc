@@ -27,6 +27,7 @@ void PuppiContainer::initialize(const std::vector<RecoObj> &iRecoObjects) {
     fVals.resize(0);
     //fChargedNoPV.resize(0);
     //Link to the RecoObjects
+    fPVFrac = 0.; 
     fRecoParticles = iRecoObjects;
     for (unsigned int i = 0; i < fRecoParticles.size(); i++){
         fastjet::PseudoJet curPseudoJet;
@@ -36,10 +37,12 @@ void PuppiContainer::initialize(const std::vector<RecoObj> &iRecoObjects) {
         fPFParticles.push_back(curPseudoJet);
 	//Take Charged particles associated to PV
 	if(fRecoParticles[i].id == 2) fChargedPV.push_back(curPseudoJet);
+	if(fRecoParticles[i].id >  1) fPVFrac+=1.;
 	//if((fRecoParticles[i].id == 0) && (inParticles[i].id == 2))  _genParticles.push_back( curPseudoJet);
 	//if(fRecoParticles[i].id <= 2 && !(inParticles[i].pt < fNeutralMinE && fRecoParticles[i].id < 2)) _pfchsParticles.push_back(curPseudoJet); 
 	//if(fRecoParticles[i].id == 3) _chargedNoPV.push_back(curPseudoJet);
     }
+    fPVFrac = double(fChargedPV.size())/fPVFrac;
 }
 PuppiContainer::~PuppiContainer(){}
 double PuppiContainer::goodVar(PseudoJet &iPart,std::vector<PseudoJet> &iParts, int iOpt,double iRCone) {
@@ -47,7 +50,7 @@ double PuppiContainer::goodVar(PseudoJet &iPart,std::vector<PseudoJet> &iParts, 
   lPup = var_within_R(iOpt,iParts,iPart,iRCone);
   return lPup;
 }
-//In fact takes the median no the average
+//In fact takes the median not the average
 void PuppiContainer::getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iConstits,std::vector<fastjet::PseudoJet> &iParticles,std::vector<fastjet::PseudoJet> &iChargedParticles) { 
   for(unsigned int i0 = 0; i0 < iConstits.size(); i0++ ) { 
     double pVal = -1;
@@ -68,7 +71,7 @@ void PuppiContainer::getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iConsti
     if(std::isnan(pVal) || std::isinf(pVal)) continue;
     fPuppiAlgo[pPupId].add(iConstits[i0],pVal,iOpt);
   }
-  for(int i0 = 0; i0 < fNAlgos; i0++) fPuppiAlgo[i0].computeMedRMS(iOpt);
+  for(int i0 = 0; i0 < fNAlgos; i0++) fPuppiAlgo[i0].computeMedRMS(iOpt,fPVFrac);
 }
 int    PuppiContainer::getPuppiId(const float &iPt,const float &iEta) { 
   int lId = -1; 
@@ -135,8 +138,7 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       if(fPFParticles[i0].user_index() == 2 && fApplyCHS ) pWeight = 1;
       if(fPFParticles[i0].user_index() == 3 && fApplyCHS ) pWeight = 0;
       //Basic Weight Checks
-      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos 
-					<< std::endl;
+      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos << std::endl;
       //if(isnan(pWeight)) continue;
       //Basic Cuts      
       if(pWeight                         < fPuppiWeightCut) pWeight = 0;  //==> Elminate the low Weight stuff

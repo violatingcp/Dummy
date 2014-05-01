@@ -40,6 +40,7 @@ protected:
     double fNeutralMinPt;
     double fPuppiWeightCut;
     int    fNAlgos;
+    double fPVFrac;
     std::vector<PuppiAlgo> fPuppiAlgo;
 };
 #endif
