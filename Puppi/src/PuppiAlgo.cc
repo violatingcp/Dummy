@@ -66,6 +66,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   std::sort(fPups.begin()+lNBefore,fPups.begin()+lNBefore+fNCount[iAlgo]);
   double lCorr = 1.;
   if(!fCharged[iAlgo] && fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
+  //if(fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
 
   int lNHalfway = lNBefore + int( double( fNCount[iAlgo] )*0.50*lCorr);
   fMedian[iAlgo] = fPups[lNHalfway];
@@ -75,6 +76,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) {
     fMean[iAlgo] += fPups[i0];
     if(!fCharged[iAlgo] && fAdjust[iAlgo] && fPups[i0] > lMed) continue;
+    //if(fAdjust[iAlgo] && fPups[i0] > lMed) continue;
     lNRMS++;
     fRMS [iAlgo] += (fPups[i0]-lMed)*(fPups[i0]-lMed);
   }
@@ -84,7 +86,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
 
   fRMS [iAlgo] = sqrt(fRMS[iAlgo]);
   fRMS [iAlgo] *= fRMSScaleFactor[iAlgo];
-  if(!fCharged[iAlgo]) std::cout << " Process : " << iAlgo  << " Median : " << fMedian[iAlgo] << " +/- " << fRMS[iAlgo]  << " -- Begin : " << lNBefore << " -- Total :  " << fNCount[iAlgo] << " -- 50% " << lNHalfway  << " Fraction less than @ Median : " << std::endl;
+  //if(!fCharged[iAlgo]) std::cout << " Process : " << iAlgo  << " Median : " << fMedian[iAlgo] << " +/- " << fRMS[iAlgo]  << " -- Begin : " << lNBefore << " -- Total :  " << fNCount[iAlgo] << " -- 50% " << lNHalfway  << " Fraction less than @ Median : " << std::endl;
   if(!fAdjust[iAlgo]) return;
   //Adjust the p-value to correspond to the median
   std::sort(fPupsPV.begin(),fPupsPV.end());
@@ -109,6 +111,7 @@ double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) {
     //Special Check for any algo with log(0) 
     // if(fAlgoId[i0] == 0 && iVals[i0] == 0) pVal = fMedian[i0];
     if(fAlgoId[i0] == 3 && iVals[i0] == 0) pVal = fMedian[i0];
+    if(fAlgoId[i0] == 5 && iVals[i0] == 0) pVal = fMedian[i0];
     lVal += (pVal-fMedian[i0])*(fabs(pVal-fMedian[i0]))/fRMS[i0]/fRMS[i0];
     lNDOF++;
     if(i0 == 0 && iChi2 != 0) lNDOF++;      //Add external Chi2 to first element

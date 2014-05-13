@@ -249,14 +249,16 @@ double var_within_R(int iId, const vector<PseudoJet> & particles, const PseudoJe
     if(pDR  < 0.001) continue;
     if(pDR  <  0.01) pDR = 0.01;
     if(pDR == 0) continue;
-    if(iId == 0) var += (near_particles[i].pt()/pDR)*(near_particles[i].pt()/pDR);
+    if(iId == 0) var += (near_particles[i].pt()/pDR/pDR);
     if(iId == 1) var += near_particles[i].pt();
     if(iId == 2) var += (1./pDR)*(1./pDR);
     if(iId == 3) var += (1./pDR)*(1./pDR);
     if(iId == 4) var += near_particles[i].pt();  
+    if(iId == 5) var += (near_particles[i].pt()/pDR)*(near_particles[i].pt()/pDR);
   }
   if(iId == 0 && var != 0) var = log(var);
   if(iId == 3 && var != 0) var = log(var);
+  if(iId == 5 && var != 0) var = log(var);
   return var;
 }
 
