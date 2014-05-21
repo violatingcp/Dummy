@@ -60,7 +60,8 @@ void PuppiAlgo::add(const fastjet::PseudoJet &iParticle,const double &iVal,const
   fNCount[iAlgo]++;
 }
 void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) { 
-  if(iAlgo >= fNAlgos) return;
+  if(iAlgo >= fNAlgos   ) return;
+  if(fNCount[iAlgo] == 0) return;
   int lNBefore = 0; 
   for(unsigned int i0 = 0; i0 < iAlgo; i0++) lNBefore += fNCount[i0];
   std::sort(fPups.begin()+lNBefore,fPups.begin()+lNBefore+fNCount[iAlgo]);
@@ -101,6 +102,7 @@ double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) {
   double lPVal = 1.;
   int    lNDOF = 0; 
   for(unsigned int i0 = 0; i0 < fNAlgos; i0++) { 
+    if(fNCount[i0] == 0) return 1.;   //in the NoPU case return 1.
     if(fCombId[i0] == 1 && i0 > 0) {  //Compute the previous p-value so that p-values can be multiplieed
       double pPVal = ROOT::Math::chisquared_cdf(lVal,lNDOF);
       lPVal *= pPVal;
