@@ -7,7 +7,7 @@
 
 PuppiContainer::PuppiContainer(const edm::ParameterSet &iConfig) {
   fApplyCHS        = iConfig.getUntrackedParameter<bool>("applyCHS"); 
-  fUseExp           = iConfig.getUntrackedParameter<bool>("useExp");
+  fUseExp          = iConfig.getUntrackedParameter<bool>("useExp");
   fNeutralMinPt    = iConfig.getUntrackedParameter<double>("MinNeutralPt");
   fPuppiWeightCut  = iConfig.getUntrackedParameter<double>("MinPuppiWeight");
   std::vector<edm::ParameterSet> lAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("algos"); 
@@ -16,7 +16,8 @@ PuppiContainer::PuppiContainer(const edm::ParameterSet &iConfig) {
     PuppiAlgo pPuppiConfig(lAlgos[i0]);
     fPuppiAlgo.push_back(pPuppiConfig);
   }
-}  
+}
+  
 void PuppiContainer::initialize(const std::vector<RecoObj> &iRecoObjects) { 
     //Clear everything
     fRecoParticles.resize(0);
@@ -32,24 +33,29 @@ void PuppiContainer::initialize(const std::vector<RecoObj> &iRecoObjects) {
     for (unsigned int i = 0; i < fRecoParticles.size(); i++){
         fastjet::PseudoJet curPseudoJet;
         curPseudoJet.reset_PtYPhiM(fRecoParticles[i].pt,fRecoParticles[i].eta,fRecoParticles[i].phi,fRecoParticles[i].m);
-        curPseudoJet.set_user_index(fRecoParticles[i].id);
+	if(fRecoParticles[i].id == 0 or fRecoParticles[i].charge == 0)  curPseudoJet.set_user_index(0); // zero is neutral hadron                                                         
+	if(fRecoParticles[i].id == 1 and fRecoParticles[i].charge != 0) curPseudoJet.set_user_index(fRecoParticles[i].charge); // from PV use the                             
+	if(fRecoParticles[i].id == 2 and fRecoParticles[i].charge != 0) curPseudoJet.set_user_index(fRecoParticles[i].charge+5); // from NPV use the charge as key +5 as key                 
         // fill vector of pseudojets for internal references
         fPFParticles.push_back(curPseudoJet);
 	//Take Charged particles associated to PV
-	if(fRecoParticles[i].id == 2) fChargedPV.push_back(curPseudoJet);
-	if(fRecoParticles[i].id >  1) fPVFrac+=1.;
+	if(fRecoParticles[i].id == 1) fChargedPV.push_back(curPseudoJet);
+	if(fabs(fRecoParticles[i].id) >= 1 ) fPVFrac+=1.;
 	//if((fRecoParticles[i].id == 0) && (inParticles[i].id == 2))  _genParticles.push_back( curPseudoJet);
 	//if(fRecoParticles[i].id <= 2 && !(inParticles[i].pt < fNeutralMinE && fRecoParticles[i].id < 2)) _pfchsParticles.push_back(curPseudoJet); 
 	//if(fRecoParticles[i].id == 3) _chargedNoPV.push_back(curPseudoJet);
     }
     fPVFrac = double(fChargedPV.size())/fPVFrac;
 }
+
 PuppiContainer::~PuppiContainer(){}
+
 double PuppiContainer::goodVar(PseudoJet &iPart,std::vector<PseudoJet> &iParts, int iOpt,double iRCone) {
   double lPup = 0;
   lPup = var_within_R(iOpt,iParts,iPart,iRCone);
   return lPup;
 }
+
 //In fact takes the median not the average
 void PuppiContainer::getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iConstits,std::vector<fastjet::PseudoJet> &iParticles,std::vector<fastjet::PseudoJet> &iChargedParticles) { 
   for(unsigned int i0 = 0; i0 < iConstits.size(); i0++ ) { 
@@ -135,14 +141,14 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       for(int i1 = 0; i1 < lNAlgos; i1++) pVals.push_back(fVals[lNParticles*i1+i0]);
       pWeight = fPuppiAlgo[pPupId].compute(pVals,pChi2);
       //Apply the CHS weights
-      if(fPFParticles[i0].user_index() == 2 && fApplyCHS ) pWeight = 1;
-      if(fPFParticles[i0].user_index() == 3 && fApplyCHS ) pWeight = 0;
+      if((fabs(fPFParticles[i0].user_index()) <= 2 && fabs(fPFParticles[i0].user_index()) != 0) && fApplyCHS ) pWeight = 1;
+      if(fabs(fPFParticles[i0].user_index()) >= 3 && fApplyCHS ) pWeight = 0;
       //Basic Weight Checks
       if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos << std::endl;
       //if(isnan(pWeight)) continue;
       //Basic Cuts      
       if(pWeight                         < fPuppiWeightCut) pWeight = 0;  //==> Elminate the low Weight stuff
-      if(pWeight*fPFParticles[i0].pt()   < fNeutralMinPt && fRecoParticles[i0].pfType > 3 ) pWeight =0;  //threshold cut on the neutral Pt
+      if(pWeight*fPFParticles[i0].pt()   < fNeutralMinPt && fabs(fRecoParticles[i0].pfType) > 3 ) pWeight =0;  //threshold cut on the neutral Pt
       fWeights .push_back(pWeight);
       //Now get rid of the thrown out weights for the particle collection
       if(pWeight == 0) continue;

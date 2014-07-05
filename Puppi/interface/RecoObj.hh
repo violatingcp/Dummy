@@ -10,7 +10,7 @@ public:
 	trkChi2(0),vtxChi2(0),
 	time(0),depth(0),
 	expProb(0),expChi2PU(0),expChi2(0),
-	dZ(0),d0(0)
+	dZ(0),d0(0),charge(0)
     {}
     ~RecoObj(){}
     
@@ -26,5 +26,6 @@ public:
     float         expChi2;
     float         dZ;
     float         d0;
+    int           charge;
 };
 #endif
