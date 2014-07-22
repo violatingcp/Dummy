@@ -66,18 +66,25 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   for(unsigned int i0 = 0; i0 < iAlgo; i0++) lNBefore += fNCount[i0];
   std::sort(fPups.begin()+lNBefore,fPups.begin()+lNBefore+fNCount[iAlgo]);
   double lCorr = 1.;
-  if(!fCharged[iAlgo] && fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
-  //if(fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
-
-  int lNHalfway = lNBefore + int( double( fNCount[iAlgo] )*0.50*lCorr);
+  //if(!fCharged[iAlgo] && fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
+  if(fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
+  int lNum0 = 0;
+  for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) { 
+    if(fPups[i0] == 0) continue;
+    lNum0 = i0-lNBefore; 
+    break;
+  }
+  lNum0 = 0; 
+  int lNHalfway = lNBefore + lNum0 + int( double( fNCount[iAlgo]-lNum0 )*0.50*lCorr);
   fMedian[iAlgo] = fPups[lNHalfway];
   double lMed = fMedian[iAlgo];  //Just to make the readability easier
 
   int lNRMS = 0; 
   for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) {
     fMean[iAlgo] += fPups[i0];
+    if(fPups[i0] == 0) continue;
     if(!fCharged[iAlgo] && fAdjust[iAlgo] && fPups[i0] > lMed) continue;
-    //if(fAdjust[iAlgo] && fPups[i0] > lMed) continue;
+    //if(fAdjust[iAlgo] && fPups[i0] > lMed || fPups[i0] == 0) continue;
     lNRMS++;
     fRMS [iAlgo] += (fPups[i0]-lMed)*(fPups[i0]-lMed);
   }
@@ -92,7 +99,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   //Adjust the p-value to correspond to the median
   std::sort(fPupsPV.begin(),fPupsPV.end());
   int lNPV = 0; for(unsigned int i0 = 0; i0 < fPupsPV.size(); i0++) if(fPupsPV[i0] <= lMed ) lNPV++; 
-  double lAdjust = 2.*double(lNPV)/double(fPupsPV.size()+fNCount[iAlgo]);
+  double lAdjust = 1.5*double(lNPV)/double(fPupsPV.size()+fNCount[iAlgo]);
   if(lAdjust > 0) fMedian[iAlgo] -= sqrt(ROOT::Math::chisquared_quantile(lAdjust,1.)*fRMS[iAlgo]);
 }
 //This code is probably a bit confusing
