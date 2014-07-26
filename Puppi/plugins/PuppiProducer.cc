@@ -56,7 +56,7 @@
      pReco.eta = itPF->eta();
      pReco.phi = itPF->phi();
      pReco.m   = itPF->mass();
-
+     pReco.charge = itPF->charge(); 
      const reco::Vertex *closestVtx = 0;
      double pDZ    = -9999; 
      double pD0    = -9999; 
@@ -82,13 +82,13 @@
      if(closestVtx == 0) pReco.vtxId = -1;
      if(closestVtx != 0) pReco.vtxId = pVtxId;
      if(closestVtx != 0) pReco.vtxChi2 = closestVtx->trackWeight(itPF->trackRef());
-     //Set the id for Puppi Algo   (1- Neutral, 2-Charged PV, 3-Charged PU)
-     pReco.id       = 1; 
-     if(closestVtx != 0 && pVtxId == 0)                   pReco.id = 2;
-     if(closestVtx != 0 && pVtxId >  0)                   pReco.id = 3;
+     //Set the id for Puppi Algo: 0 is neutral pfCandidate, id = 1 for particles coming from PV and id = 2 for charged particles from non-leading vertex
+     pReco.id       = 0; 
+     if(closestVtx != 0 && pVtxId == 0) pReco.id = 1;
+     if(closestVtx != 0 && pVtxId >  0) pReco.id = 2;
      //Add a dZ cut if wanted (this helps)
-     if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) < fDZCut)) pReco.id = 2; 
-     if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) > fDZCut)) pReco.id = 3; 
+     if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) < fDZCut)) pReco.id = 1; 
+     if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) > fDZCut)) pReco.id = 2; 
      fRecoObjCollection.push_back(pReco);
    }
    fPuppiContainer->initialize(fRecoObjCollection);
