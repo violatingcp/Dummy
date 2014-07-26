@@ -70,9 +70,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   if(fAdjust[iAlgo]) lCorr *= 1. - iPVFrac;
   int lNum0 = 0;
   for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) { 
-    if(fPups[i0] == 0) continue;
-    lNum0 = i0-lNBefore; 
-    break;
+    if(fPups[i0] == 0) lNum0 = i0-lNBefore; 
   }
   lNum0 = 0; 
   int lNHalfway = lNBefore + lNum0 + int( double( fNCount[iAlgo]-lNum0 )*0.50*lCorr);
@@ -84,7 +82,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
     fMean[iAlgo] += fPups[i0];
     if(fPups[i0] == 0) continue;
     if(!fCharged[iAlgo] && fAdjust[iAlgo] && fPups[i0] > lMed) continue;
-    //if(fAdjust[iAlgo] && fPups[i0] > lMed || fPups[i0] == 0) continue;
+    //if(fAdjust[iAlgo] && fPups[i0] > lMed) continue;
     lNRMS++;
     fRMS [iAlgo] += (fPups[i0]-lMed)*(fPups[i0]-lMed);
   }
@@ -118,7 +116,7 @@ double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) {
     }
     double pVal = iVals[i0];
     //Special Check for any algo with log(0) 
-    // if(fAlgoId[i0] == 0 && iVals[i0] == 0) pVal = fMedian[i0];
+    if(fAlgoId[i0] == 0 && iVals[i0] == 0) pVal = fMedian[i0];
     if(fAlgoId[i0] == 3 && iVals[i0] == 0) pVal = fMedian[i0];
     if(fAlgoId[i0] == 5 && iVals[i0] == 0) pVal = fMedian[i0];
     lVal += (pVal-fMedian[i0])*(fabs(pVal-fMedian[i0]))/fRMS[i0]/fRMS[i0];

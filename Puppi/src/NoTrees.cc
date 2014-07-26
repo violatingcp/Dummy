@@ -247,7 +247,7 @@ double var_within_R(int iId, const vector<PseudoJet> & particles, const PseudoJe
     if(pDPhi > 2.*3.14159265-pDPhi) pDPhi =  2.*3.14159265-pDPhi;
     double pDR = sqrt(pDEta*pDEta+pDPhi*pDPhi);
     if(pDR  < 0.001) continue;
-    if(pDR  <  0.01) pDR = 0.01;
+    if(pDR  <  0.01) continue;//pDR = 0.01;
     if(pDR == 0) continue;
     if(iId == 0) var += (near_particles[i].pt()/pDR/pDR);
     if(iId == 1) var += near_particles[i].pt();

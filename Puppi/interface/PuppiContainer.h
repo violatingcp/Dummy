@@ -38,8 +38,10 @@ protected:
     bool   fApplyCHS;
     bool   fUseExp;
     double fNeutralMinPt;
+    double fNeutralSlope;
     double fPuppiWeightCut;
     int    fNAlgos;
+    int    fNPV;
     double fPVFrac;
     std::vector<PuppiAlgo> fPuppiAlgo;
 };
