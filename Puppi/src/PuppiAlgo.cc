@@ -72,7 +72,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
   for(int i0 = lNBefore; i0 < lNBefore+fNCount[iAlgo]; i0++) { 
     if(fPups[i0] == 0) lNum0 = i0-lNBefore; 
   }
-  lNum0 = 0; 
+  //lNum0 = 0; 
   int lNHalfway = lNBefore + lNum0 + int( double( fNCount[iAlgo]-lNum0 )*0.50*lCorr);
   fMedian[iAlgo] = fPups[lNHalfway];
   double lMed = fMedian[iAlgo];  //Just to make the readability easier
