@@ -18,38 +18,38 @@ PuppiContainer::PuppiContainer(const edm::ParameterSet &iConfig) {
     fPuppiAlgo.push_back(pPuppiConfig);
   }
 }
-  
+
 void PuppiContainer::initialize(const std::vector<RecoObj> &iRecoObjects) { 
     //Clear everything
-    fRecoParticles.resize(0);
-    fPFParticles  .resize(0);
-    fChargedPV    .resize(0);
-    fPupParticles .resize(0);
-    fWeights      .resize(0);
-    fVals.resize(0);
+  fRecoParticles.resize(0);
+  fPFParticles  .resize(0);
+  fChargedPV    .resize(0);
+  fPupParticles .resize(0);
+  fWeights      .resize(0);
+  fVals.resize(0);
     //fChargedNoPV.resize(0);
     //Link to the RecoObjects
-    fPVFrac = 0.; 
-    fNPV    = 1.;
-    fRecoParticles = iRecoObjects;
-    for (unsigned int i = 0; i < fRecoParticles.size(); i++){
-        fastjet::PseudoJet curPseudoJet;
-        curPseudoJet.reset_PtYPhiM(fRecoParticles[i].pt,fRecoParticles[i].eta,fRecoParticles[i].phi,fRecoParticles[i].m);
+  fPVFrac = 0.; 
+  fNPV    = 1.;
+  fRecoParticles = iRecoObjects;
+  for (unsigned int i = 0; i < fRecoParticles.size(); i++){
+    fastjet::PseudoJet curPseudoJet;
+    curPseudoJet.reset_PtYPhiM(fRecoParticles[i].pt,fRecoParticles[i].eta,fRecoParticles[i].phi,fRecoParticles[i].m);
 	if(fRecoParticles[i].id == 0 or fRecoParticles[i].charge == 0)  curPseudoJet.set_user_index(0); // zero is neutral hadron                                                         
 	if(fRecoParticles[i].id == 1 and fRecoParticles[i].charge != 0) curPseudoJet.set_user_index(fRecoParticles[i].charge); // from PV use the                             
 	if(fRecoParticles[i].id == 2 and fRecoParticles[i].charge != 0) curPseudoJet.set_user_index(fRecoParticles[i].charge+5); // from NPV use the charge as key +5 as key                 
         // fill vector of pseudojets for internal references
-        fPFParticles.push_back(curPseudoJet);
+  fPFParticles.push_back(curPseudoJet);
 	//Take Charged particles associated to PV
-	if(fabs(fRecoParticles[i].id) == 1) fChargedPV.push_back(curPseudoJet);
-	if(fabs(fRecoParticles[i].id) >= 1 ) fPVFrac+=1.;
+  if(fabs(fRecoParticles[i].id) == 1) fChargedPV.push_back(curPseudoJet);
+  if(fabs(fRecoParticles[i].id) >= 1 ) fPVFrac+=1.;
 	//if((fRecoParticles[i].id == 0) && (inParticles[i].id == 2))  _genParticles.push_back( curPseudoJet);
 	//if(fRecoParticles[i].id <= 2 && !(inParticles[i].pt < fNeutralMinE && fRecoParticles[i].id < 2)) _pfchsParticles.push_back(curPseudoJet); 
 	//if(fRecoParticles[i].id == 3) _chargedNoPV.push_back(curPseudoJet);
-	if(fNPV < fRecoParticles[i].vtxId) fNPV = fRecoParticles[i].vtxId;
-    }
-    std::cout << "NPV: " << fNPV << std::endl;
-    fPVFrac = double(fChargedPV.size())/fPVFrac;
+  if(fNPV < fRecoParticles[i].vtxId) fNPV = fRecoParticles[i].vtxId;
+}
+std::cout << "NPV: " << fNPV << std::endl;
+fPVFrac = double(fChargedPV.size())/fPVFrac;
 }
 PuppiContainer::~PuppiContainer(){}
 
@@ -108,46 +108,46 @@ double PuppiContainer::getChi2FromdZ(double iDZ) {
   return lChi2PU;
 }
 const std::vector<double> PuppiContainer::puppiWeights() {
-    fPupParticles .resize(0);
-    fWeights      .resize(0);
-    fVals         .resize(0);
-    for(int i0 = 0; i0 < fNAlgos; i0++) fPuppiAlgo[i0].reset();
-    
+  fPupParticles .resize(0);
+  fWeights      .resize(0);
+  fVals         .resize(0);
+  for(int i0 = 0; i0 < fNAlgos; i0++) fPuppiAlgo[i0].reset();
+
     int lNMaxAlgo = 1;
-    for(int i0 = 0; i0 < fNAlgos; i0++) lNMaxAlgo = TMath::Max(fPuppiAlgo[i0].numAlgos(),lNMaxAlgo);
+  for(int i0 = 0; i0 < fNAlgos; i0++) lNMaxAlgo = TMath::Max(fPuppiAlgo[i0].numAlgos(),lNMaxAlgo);
     //Run through all compute mean and RMS
     int lNParticles    = fRecoParticles.size();
-    for(int i0 = 0; i0 < lNMaxAlgo; i0++) { 
-      getRMSAvg(i0,fPFParticles,fPFParticles,fChargedPV);
-    }
-    std::vector<double> pVals;
-    for(int i0 = 0; i0 < lNParticles; i0++) {
+  for(int i0 = 0; i0 < lNMaxAlgo; i0++) { 
+    getRMSAvg(i0,fPFParticles,fPFParticles,fChargedPV);
+  }
+  std::vector<double> pVals;
+  for(int i0 = 0; i0 < lNParticles; i0++) {
       //Refresh
-      pVals.clear();
-      double pWeight = 1;
+    pVals.clear();
+    double pWeight = 1;
       //Get the Puppi Id and if ill defined move on
-      int  pPupId   = getPuppiId(fRecoParticles[i0].pt,fRecoParticles[i0].eta);
-      if(pPupId == -1) {
-	fWeights .push_back(pWeight);
-	continue;
-      }
+    int  pPupId   = getPuppiId(fRecoParticles[i0].pt,fRecoParticles[i0].eta);
+    if(pPupId == -1) {
+     fWeights .push_back(pWeight);
+     continue;
+   }
       // fill the p-values
-      double pChi2   = 0;
-      if(fUseExp){ 
+   double pChi2   = 0;
+   if(fUseExp){ 
 	//Compute an Experimental Puppi Weight with delta Z info (very simple example)
-	pChi2 = getChi2FromdZ(fRecoParticles[i0].dZ);
+     pChi2 = getChi2FromdZ(fRecoParticles[i0].dZ);
 	//Now make sure Neutrals are not set
-	if(fRecoParticles[i0].pfType > 3) pChi2 = 0;
-      }
+     if(fRecoParticles[i0].pfType > 3) pChi2 = 0;
+   }
       //Fill and compute the PuppiWeight
-      int lNAlgos = fPuppiAlgo[pPupId].numAlgos();
-      for(int i1 = 0; i1 < lNAlgos; i1++) pVals.push_back(fVals[lNParticles*i1+i0]);
-      pWeight = fPuppiAlgo[pPupId].compute(pVals,pChi2);
+   int lNAlgos = fPuppiAlgo[pPupId].numAlgos();
+   for(int i1 = 0; i1 < lNAlgos; i1++) pVals.push_back(fVals[lNParticles*i1+i0]);
+    pWeight = fPuppiAlgo[pPupId].compute(pVals,pChi2);
       //Apply the CHS weights
-      if((fabs(fPFParticles[i0].user_index()) <= 2 && fabs(fPFParticles[i0].user_index()) != 0) && fApplyCHS ) pWeight = 1;
-      if(fabs(fPFParticles[i0].user_index()) >= 3 && fApplyCHS ) pWeight = 0;
+  if((fabs(fPFParticles[i0].user_index()) <= 2 && fabs(fPFParticles[i0].user_index()) != 0) && fApplyCHS ) pWeight = 1;
+  if(fabs(fPFParticles[i0].user_index()) >= 3 && fApplyCHS ) pWeight = 0;
       //Basic Weight Checks
-      if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos << std::endl;
+  if(std::isnan(pWeight)) std::cerr << "====> Weight is nan  : pt " << fRecoParticles[i0].pt << " -- eta : " << fRecoParticles[i0].eta << " -- Value" << fVals[i0] << " -- id :  " << fRecoParticles[i0].id << " --  NAlgos: " << lNAlgos << std::endl;
       //if(isnan(pWeight)) continue;
       //Basic Cuts      
       if(pWeight                         < fPuppiWeightCut) pWeight = 0;  //==> Elminate the low Weight stuff
@@ -158,9 +158,9 @@ const std::vector<double> PuppiContainer::puppiWeights() {
       //Produce
       PseudoJet curjet( pWeight*fPFParticles[i0].px(), pWeight*fPFParticles[i0].py(), pWeight*fPFParticles[i0].pz(), pWeight*fPFParticles[i0].e());
       curjet.set_user_index(i0);//fRecoParticles[i0].id);
-      fPupParticles.push_back(curjet);
-     }
-    return fWeights;
+fPupParticles.push_back(curjet);
+}
+return fWeights;
 }
 
 
