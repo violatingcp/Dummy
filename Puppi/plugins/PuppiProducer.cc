@@ -68,7 +68,7 @@ typedef edm::View<reco::Candidate> CandidateView;
      int    pVtxId = -9999; 
      bool lFirst = true;
      const pat::PackedCandidate *lPack = dynamic_cast<const pat::PackedCandidate*>(&(*itPF));
-     std::cout << " ===> " << itPF->vertex() << " -- PC " << lPack<< std::endl; 
+     //std::cout << " ===> " << itPF->vertex() << " -- PC " << lPack<< std::endl; 
      if(lPack == 0 ) { 
        const reco::PFCandidate *pPF = dynamic_cast<const reco::PFCandidate*>(&(*itPF));
        for(reco::VertexCollection::const_iterator iV = pvCol->begin(); iV!=pvCol->end(); ++iV) {
