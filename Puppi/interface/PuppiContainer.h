@@ -2,7 +2,6 @@
 #define DUMMY_PUPPI_PUPPICONTAINER_H_
 
 #include "Dummy/Puppi/interface/PuppiAlgo.h"
-#include "Dummy/Puppi/interface/NoTrees.hh"
 #include "Dummy/Puppi/interface/RecoObj.hh"
 #include "fastjet/internal/base.hh"
 #include "fastjet/PseudoJet.hh"
@@ -28,7 +27,8 @@ protected:
     void    getRMSAvg    (int iOpt,std::vector<fastjet::PseudoJet> &iConstits,std::vector<fastjet::PseudoJet> &iParticles,std::vector<fastjet::PseudoJet> &iChargeParticles);
     double  getChi2FromdZ(double iDZ);
     int     getPuppiId   (const float &iPt,const float &iEta);
-  
+    double  var_within_R (int iId, const vector<PseudoJet> & particles, const PseudoJet& centre, double R);  
+    
     std::vector<RecoObj>   fRecoParticles;
     std::vector<PseudoJet> fPFParticles;
     std::vector<PseudoJet> fChargedPV;

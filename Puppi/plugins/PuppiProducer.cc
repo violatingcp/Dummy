@@ -68,7 +68,6 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    int    pVtxId = -9999; 
    bool lFirst = true;
    const pat::PackedCandidate *lPack = dynamic_cast<const pat::PackedCandidate*>(&(*itPF));
-     //std::cout << " ===> " << itPF->vertex() << " -- PC " << lPack<< std::endl; 
    if(lPack == 0 ) { 
      const reco::PFCandidate *pPF = dynamic_cast<const reco::PFCandidate*>(&(*itPF));
      for(reco::VertexCollection::const_iterator iV = pvCol->begin(); iV!=pvCol->end(); ++iV) {
@@ -90,7 +89,7 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    pDZ        = lPack->dz(); 
    pD0        = lPack->dxy(); 
    closestVtx = &(*(lPack->vertexRef()));
-   pVtxId     = ((lPack->fromPV() ==  pat::PackedCandidate::PVLoose));
+   pVtxId     = (lPack->fromPV() !=  (pat::PackedCandidate::PVLoose || pat::PackedCandidate::PVTight || pat::PackedCandidate::PVUsedInFit));
  }
  pReco.dZ      = pDZ;
  pReco.d0      = pD0;

@@ -21,12 +21,15 @@ public:
   int    algoId   (const unsigned int &iAlgo);
   bool   isCharged(const unsigned int &iAlgo);
   double coneSize (const unsigned int &iAlgo);
-  
+  double neutralPt(int iNPV);
+
 private:  
   unsigned int   fNAlgos;
-  float fEtaMax;
-  float fEtaMin;
-  float fPtMin ;
+  float  fEtaMax;
+  float  fEtaMin;
+  float  fPtMin ;
+  double fNeutralPtMin;
+  double fNeutralPtSlope;
   std::vector<float>  fPups;
   std::vector<float>  fPupsPV;
   std::vector<int>    fAlgoId;

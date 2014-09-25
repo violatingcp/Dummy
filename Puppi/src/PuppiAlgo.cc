@@ -6,20 +6,23 @@
 #include "TMath.h"
 
 PuppiAlgo::PuppiAlgo(edm::ParameterSet &iConfig) { 
-  fEtaMin  = iConfig.getUntrackedParameter<double>("etaMin");
-  fEtaMax  = iConfig.getUntrackedParameter<double>("etaMax");
-  fPtMin   = iConfig.getUntrackedParameter<double>("ptMin");
+  fEtaMin             = iConfig.getUntrackedParameter<double>("etaMin");
+  fEtaMax             = iConfig.getUntrackedParameter<double>("etaMax");
+  fPtMin              = iConfig.getUntrackedParameter<double>("ptMin");
+  fNeutralPtMin       = iConfig.getUntrackedParameter<double>("MinNeutralPt");      // Weighted Neutral Pt Cut
+  fNeutralPtSlope     = iConfig.getUntrackedParameter<double>("MinNeutralPtSlope"); // Slope vs #pv
+
   std::vector<edm::ParameterSet> lAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("puppiAlgos"); 
   fNAlgos = lAlgos.size();
   //Uber Configurable Puppi 
   for(unsigned int i0 = 0; i0 < lAlgos.size(); i0++)  { 
-    int    pAlgoId      = lAlgos[i0].getUntrackedParameter<int > ("algoId");
-    bool   pCharged     = lAlgos[i0].getUntrackedParameter<bool> ("useCharged");
-    bool   pWeight0     = lAlgos[i0].getUntrackedParameter<bool> ("applyLowPUCorr");
-    int    pComb        = lAlgos[i0].getUntrackedParameter<int>  ("combOpt");    // 0=> add in chi2/1=>Multiply p-values
-    double pConeSize    = lAlgos[i0].getUntrackedParameter<double>("cone");   // Min Pt when computing pt and rms
-    double pRMSPtMin    = lAlgos[i0].getUntrackedParameter<double>("rmsPtMin");   // Min Pt when computing pt and rms
-    double pRMSSF       = lAlgos[i0].getUntrackedParameter<double>("rmsScaleFactor");   // Additional Tuning parameter for Jokers
+    int    pAlgoId      = lAlgos[i0].getUntrackedParameter<int >  ("algoId");
+    bool   pCharged     = lAlgos[i0].getUntrackedParameter<bool>  ("useCharged");
+    bool   pWeight0     = lAlgos[i0].getUntrackedParameter<bool>  ("applyLowPUCorr");
+    int    pComb        = lAlgos[i0].getUntrackedParameter<int>   ("combOpt");           // 0=> add in chi2/1=>Multiply p-values
+    double pConeSize    = lAlgos[i0].getUntrackedParameter<double>("cone");              // Min Pt when computing pt and rms
+    double pRMSPtMin    = lAlgos[i0].getUntrackedParameter<double>("rmsPtMin");          // Min Pt when computing pt and rms
+    double pRMSSF       = lAlgos[i0].getUntrackedParameter<double>("rmsScaleFactor");    // Additional Tuning parameter for Jokers
     fAlgoId        .push_back(pAlgoId);
     fCharged       .push_back(pCharged);
     fAdjust        .push_back(pWeight0);
@@ -27,7 +30,7 @@ PuppiAlgo::PuppiAlgo(edm::ParameterSet &iConfig) {
     fConeSize      .push_back(pConeSize);
     fRMSPtMin      .push_back(pRMSPtMin);
     fRMSScaleFactor.push_back(pRMSSF);
-    double pRMS  = 0; 
+     double pRMS  = 0; 
     double pMed  = 0; 
     double pMean = 0;
     int    pNCount = 0; 
@@ -127,6 +130,9 @@ double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) {
   //Top it off with the last calc
   lPVal *= ROOT::Math::chisquared_cdf(lVal,lNDOF);
   return lPVal;
+}
+double PuppiAlgo::neutralPt(int iNPV) { 
+  return fNeutralPtMin + iNPV * fNeutralPtSlope;
 }
 int PuppiAlgo::numAlgos() { 
   return fNAlgos;

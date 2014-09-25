@@ -1,5 +1,5 @@
-#ifndef Dummy_Puppi_PuppiProducer_h_
-#define Dummy_Puppi_PuppiProducer_h_
+#ifndef CommonTools_Puppi_PuppiProducer_h_
+#define CommonTools_Puppi_PuppiProducer_h_
 // system include files
 #include <memory>
 
@@ -12,7 +12,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Math/interface/PtEtaPhiMass.h"
-
 #include "Dummy/Puppi/interface/PuppiContainer.h"
 
 // ------------------------------------------------------------------------------------------
@@ -36,7 +35,7 @@ private:
 	virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 	reco::PFCandidate::ParticleType translatePdgIdToType(int pdgid) const;
         
-	  edm::InputTag fPFCands;
+	edm::InputTag fPFCands;
         edm::InputTag fVertices;
 	std::string     fPuppiName;
 	std::string     fPFName;	
