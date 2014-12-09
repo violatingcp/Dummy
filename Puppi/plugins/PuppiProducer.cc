@@ -54,9 +54,14 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
  const reco::VertexCollection *pvCol = hVertexProduct.product();
 
    //Fill the reco objects
+ // int ctr00 = 0;
+ // int ctr0PV = 0;
+ // int ctr1PV = 0;
+ // int ctr2PV = 0;
+ // int ctr3PV = 0;
  fRecoObjCollection.clear();
  for(CandidateView::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
-   RecoObj pReco;
+   RecoObj pReco; 
    pReco.pt  = itPF->pt();
    pReco.eta = itPF->eta();
    pReco.phi = itPF->phi();
@@ -90,7 +95,13 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    pD0        = lPack->dxy(); 
    closestVtx = &(*(lPack->vertexRef()));
    pVtxId     = (lPack->fromPV() !=  (pat::PackedCandidate::PVUsedInFit));
-   if(lPack->fromPV() ==  (pat::PackedCandidate::PVLoose || pat::PackedCandidate::PVTight)) closestVtx = 0;
+   if(lPack->fromPV() ==  pat::PackedCandidate::PVLoose || lPack->fromPV() == pat::PackedCandidate::PVTight) closestVtx = 0;
+
+   // if (fabs(itPF->charge()) == 0) { ctr00++; }
+   // if (lPack->fromPV() == 0 && fabs(itPF->charge()) > 0) { ctr0PV++; }
+   // if (lPack->fromPV() == 1 && fabs(itPF->charge()) > 0) { ctr1PV++; }
+   // if (lPack->fromPV() == 2 && fabs(itPF->charge()) > 0) { ctr2PV++; }
+   // if (lPack->fromPV() == 3 && fabs(itPF->charge()) > 0) { ctr3PV++; }
  }
  pReco.dZ      = pDZ;
  pReco.d0      = pD0;
@@ -104,13 +115,18 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
  if(closestVtx != 0 && pVtxId == 0 && fabs(pReco.charge) > 0) pReco.id = 1;
  if(closestVtx != 0 && pVtxId >  0 && fabs(pReco.charge) > 0) pReco.id = 2;
      //Add a dZ cut if wanted (this helps)
- if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) < fDZCut)) pReco.id = 1; 
- if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) > fDZCut)) pReco.id = 2; 
+ if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) < fDZCut) && fabs(pReco.charge) > 0) pReco.id = 1; 
+ if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) > fDZCut) && fabs(pReco.charge) > 0) pReco.id = 2; 
 
-  //std::cout << "pVtxId = " << pVtxId << ", and charge = " << itPF->charge() << ", and closestVtx = " << closestVtx << ", and id = " << pReco.id << std::endl;
+ // if (fabs(itPF->charge()) > 0 && (lPack->fromPV() == 1||lPack->fromPV() == 2)) std::cout << "pVtxId = " << pVtxId << ", and charge = " << itPF->charge() << ", and closestVtx = " << closestVtx << ", lPack->fromPV() = " << lPack->fromPV() << ", dz = " << pReco.dZ << ", d0 = " << pReco.d0 << ", and id = " << pReco.id << std::endl;
+ // if ((lPack->fromPV() == 1 || lPack->fromPV() == 2) && pReco.id == 1){
+ //  std::cout << "*----* pVtxId = " << pVtxId << ", and charge = " << itPF->charge() << ", and closestVtx = " << closestVtx << ", lPack->fromPV() = " << lPack->fromPV() << ", dz = " << pReco.dZ << ", and id = " << pReco.id << std::endl;
+ // }
 
  fRecoObjCollection.push_back(pReco);
 }
+//std::cout << ctr00 << " " << ctr0PV << " " << ctr1PV << " " << ctr2PV << " " << ctr3PV << std::endl;
+
 fPuppiContainer->initialize(fRecoObjCollection);
 
    //Compute the weights and the candidates
