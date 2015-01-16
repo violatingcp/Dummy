@@ -105,6 +105,7 @@ void PuppiAlgo::computeMedRMS(const unsigned int &iAlgo,const double &iPVFrac) {
 }
 //This code is probably a bit confusing
 double PuppiAlgo::compute(std::vector<double> &iVals,double iChi2) { 
+  if(fRMSScaleFactor[0] < 1.) return 1.;
   if(fAlgoId[0] == -1) return 1;
   double lVal  = 0.;
   double lPVal = 1.;

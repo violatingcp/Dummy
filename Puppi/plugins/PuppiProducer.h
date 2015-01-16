@@ -2,7 +2,8 @@
 #define CommonTools_Puppi_PuppiProducer_h_
 // system include files
 #include <memory>
-
+#include "TFile.h"
+#include "TTree.h"
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -40,10 +41,23 @@ private:
 	std::string     fPuppiName;
 	std::string     fPFName;	
 	std::string     fPVName;
+	std::string     fGenParName;
 	bool            fUseDZ;
         float           fDZCut;
         PuppiContainer *fPuppiContainer;
 	std::vector<RecoObj> fRecoObjCollection;
         std::auto_ptr< reco::PFCandidateCollection >          fPuppiCandidates;
+	
+	TFile *fFile;
+	TTree *fTree;
+	float fAlpha;
+	float fWeight;
+	float fPt;
+	float fPhi;
+	float fEta;
+	float fPFType;
+	float fMAlpha;
+	float fRAlpha;
+	float fGPt;
 };
 #endif

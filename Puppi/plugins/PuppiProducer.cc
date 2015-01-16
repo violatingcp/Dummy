@@ -1,6 +1,6 @@
  // system include files
  #include <memory>
-
+ #include "TMath.h"
  // user include files
  #include "FWCore/Framework/interface/Frameworkfwd.h"
  #include "FWCore/Framework/interface/EDProducer.h"
@@ -10,6 +10,8 @@
  #include "FWCore/Framework/interface/ESHandle.h"
  #include "FWCore/Framework/interface/EventSetup.h"
  #include "FWCore/ParameterSet/interface/ParameterSet.h"
+ #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+ #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
  #include "DataFormats/Common/interface/View.h"
  #include "DataFormats/Candidate/interface/Candidate.h"
  #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
@@ -32,8 +34,21 @@ PuppiProducer::PuppiProducer(const edm::ParameterSet& iConfig) {
  fPuppiContainer = new PuppiContainer(iConfig);
  fPFName    = iConfig.getUntrackedParameter<std::string>("candName"  ,"particleFlow");
  fPVName    = iConfig.getUntrackedParameter<std::string>("vertexName","offlinePrimaryVertices");
+ fGenParName= iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles");
+
  produces<edm::ValueMap<float> > ("PuppiWeights");
  produces<reco::PFCandidateCollection>(fPuppiName);
+ fFile = new TFile("PuppiAlpha.root","RECREATE");
+ fTree = new TTree("alpha","alpha");
+ fTree->Branch("alpha"    ,&fAlpha ,"fAlpha/F");
+ fTree->Branch("weight"   ,&fWeight,"fWeight/F");
+ fTree->Branch("pt"       ,&fPt    ,"fPt/F");
+ fTree->Branch("phi"      ,&fPhi   ,"fPhi/F");
+ fTree->Branch("eta"      ,&fEta   ,"fEta/F");
+ fTree->Branch("pftype"   ,&fPFType,"fPFType/F");
+ fTree->Branch("alpha_med",&fMAlpha,"fMAlpha/F");
+ fTree->Branch("alpha_rms",&fRAlpha,"fRAlpha/F");
+ fTree->Branch("genpt"    ,&fGPt   ,"fGPt/F");
 }
  // ------------------------------------------------------------------------------------------
 PuppiProducer::~PuppiProducer(){
@@ -97,45 +112,75 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
  if(closestVtx == 0) pReco.vtxId = -1;
  if(closestVtx != 0) pReco.vtxId = pVtxId;
-     //if(closestVtx != 0) pReco.vtxChi2 = closestVtx->trackWeight(itPF->trackRef());
-     //Set the id for Puppi Algo: 0 is neutral pfCandidate, id = 1 for particles coming from PV and id = 2 for charged particles from non-leading vertex
+ //if(closestVtx != 0) pReco.vtxChi2 = closestVtx->trackWeight(itPF->trackRef());
+ //Set the id for Puppi Algo: 0 is neutral pfCandidate, id = 1 for particles coming from PV and id = 2 for charged particles from non-leading vertex
  pReco.id       = 0; 
-
+ 
  if(closestVtx != 0 && pVtxId == 0 && fabs(pReco.charge) > 0) pReco.id = 1;
  if(closestVtx != 0 && pVtxId >  0 && fabs(pReco.charge) > 0) pReco.id = 2;
-     //Add a dZ cut if wanted (this helps)
+ //Add a dZ cut if wanted (this helps)
  if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) < fDZCut)) pReco.id = 1; 
  if(fUseDZ && pDZ > -9999 && closestVtx == 0 && (fabs(pDZ) > fDZCut)) pReco.id = 2; 
-
-  //std::cout << "pVtxId = " << pVtxId << ", and charge = " << itPF->charge() << ", and closestVtx = " << closestVtx << ", and id = " << pReco.id << std::endl;
-
  fRecoObjCollection.push_back(pReco);
-}
-fPuppiContainer->initialize(fRecoObjCollection);
-
-   //Compute the weights and the candidates
-const std::vector<double> lWeights = fPuppiContainer->puppiWeights();
-   //Fill it into the event
-std::auto_ptr<edm::ValueMap<float> > lPupOut(new edm::ValueMap<float>());
-edm::ValueMap<float>::Filler  lPupFiller(*lPupOut);
-lPupFiller.insert(hPFProduct,lWeights.begin(),lWeights.end());
-lPupFiller.fill();  
-iEvent.put(lPupOut,"PuppiWeights");
-   //Fill a new PF Candidate Collection
-const std::vector<fastjet::PseudoJet> lCandidates = fPuppiContainer->puppiParticles();
-fPuppiCandidates.reset( new reco::PFCandidateCollection );    
-for(unsigned int i0 = 0; i0 < lCandidates.size(); i0++) {
-     //reco::PFCandidate pCand;
- reco::PFCandidate pCand(PFCol->at(lCandidates[i0].user_index()).charge(),
-  PFCol->at(lCandidates[i0].user_index()).p4(),
-  translatePdgIdToType(PFCol->at(lCandidates[i0].user_index()).pdgId()));
-     LorentzVector pVec; //pVec.SetPtEtaPhiM(lCandidates[i0].pt(),lCandidates[i0].eta(),lCandidates[i0].phi(),lCandidates[i0].Mass());
-     pVec.SetPxPyPzE(lCandidates[i0].px(),lCandidates[i0].py(),lCandidates[i0].pz(),lCandidates[i0].E());
-     pCand.setP4(pVec);
-     fPuppiCandidates->push_back(pCand);
-   }
-   iEvent.put(fPuppiCandidates,fPuppiName);
  }
+ fPuppiContainer->initialize(fRecoObjCollection);
+ //Load the Gen Particles
+ edm::Handle<reco::GenParticleCollection> hGenParProduct;
+ iEvent.getByLabel(fGenParName,hGenParProduct);
+ const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
+ 
+ //Compute the weights and the candidates
+ const std::vector<double> lWeights  = fPuppiContainer->puppiWeights();
+ const std::vector<double> lAlpha    = fPuppiContainer->puppiAlpha();
+ const std::vector<double> lAlphaMed = fPuppiContainer->puppiAlphaMed();
+ const std::vector<double> lAlphaRMS = fPuppiContainer->puppiAlphaRMS();
+ fFile->cd();
+ int i0 = 0; 
+ //std::cout << " ---> " << lWeights.size() << " -- " << lAlpha.size() << " -- " << lAlphaMed.size() << " -- " << lAlphaRMS.size() << " -- " << PFCol->size() << std::endl;
+ for(CandidateView::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
+   const reco::PFCandidate *pPF = dynamic_cast<const reco::PFCandidate*>(&(*itPF));
+   fAlpha  = lAlpha   [i0];
+   fWeight = lWeights [i0];
+   fMAlpha = lAlphaMed[i0];
+   fRAlpha = lAlphaRMS[i0];
+   fPt     = itPF->pt();
+   fEta    = itPF->eta();
+   fPhi    = itPF->phi();
+   fPFType = float(pPF->particleId());
+   fGPt    = 0;
+   for (reco::GenParticleCollection::const_iterator itGenP = genParticles.begin(); itGenP!=genParticles.end(); ++itGenP) {
+     if(itGenP->status() != 1 ) continue;
+     double pDEta = fabs(fEta-itGenP->eta());
+     double pDPhi = fabs(fPhi-itGenP->phi());
+     if(pDPhi > TMath::Pi()*2.-pDPhi) pDPhi = TMath::Pi()*2.-pDPhi;
+     if(sqrt(pDPhi*pDPhi+pDEta*pDEta) > 0.10) continue;
+     fGPt += itGenP->pt();
+   }	
+   fTree->Fill();
+   i0++;
+ }
+ 
+ //Fill it into the event
+ std::auto_ptr<edm::ValueMap<float> > lPupOut(new edm::ValueMap<float>());
+ edm::ValueMap<float>::Filler  lPupFiller(*lPupOut);
+ lPupFiller.insert(hPFProduct,lWeights.begin(),lWeights.end());
+ lPupFiller.fill();  
+ iEvent.put(lPupOut,"PuppiWeights");
+ //Fill a new PF Candidate Collection
+ const std::vector<fastjet::PseudoJet> lCandidates = fPuppiContainer->puppiParticles();
+ fPuppiCandidates.reset( new reco::PFCandidateCollection );    
+ for(unsigned int i0 = 0; i0 < lCandidates.size(); i0++) {
+   //reco::PFCandidate pCand;
+   reco::PFCandidate pCand(PFCol->at(lCandidates[i0].user_index()).charge(),
+			   PFCol->at(lCandidates[i0].user_index()).p4(),
+			   translatePdgIdToType(PFCol->at(lCandidates[i0].user_index()).pdgId()));
+   LorentzVector pVec; //pVec.SetPtEtaPhiM(lCandidates[i0].pt(),lCandidates[i0].eta(),lCandidates[i0].phi(),lCandidates[i0].Mass());
+   pVec.SetPxPyPzE(lCandidates[i0].px(),lCandidates[i0].py(),lCandidates[i0].pz(),lCandidates[i0].E());
+   pCand.setP4(pVec);
+   fPuppiCandidates->push_back(pCand);
+ }
+ iEvent.put(fPuppiCandidates,fPuppiName);
+}
 // ------------------------------------------------------------------------------------------
  reco::PFCandidate::ParticleType PuppiProducer::translatePdgIdToType(int pdgid) const {
   switch (std::abs(pdgid)) {
@@ -155,6 +200,8 @@ void PuppiProducer::beginJob() {
 }
 // ------------------------------------------------------------------------------------------
 void PuppiProducer::endJob() {
+  fFile->cd();
+  fTree->Write();
 }
 // ------------------------------------------------------------------------------------------
 void PuppiProducer::beginRun(edm::Run&, edm::EventSetup const&) {

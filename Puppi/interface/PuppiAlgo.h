@@ -22,6 +22,8 @@ public:
   bool   isCharged(const unsigned int &iAlgo);
   double coneSize (const unsigned int &iAlgo);
   double neutralPt(int iNPV);
+  std::vector<double> fRMS;
+  std::vector<double> fMedian;
 
 private:  
   unsigned int   fNAlgos;
@@ -39,8 +41,6 @@ private:
   std::vector<double> fConeSize;
   std::vector<double> fRMSPtMin;
   std::vector<double> fRMSScaleFactor;
-  std::vector<double> fRMS;
-  std::vector<double> fMedian;
   std::vector<double> fMean;
   std::vector<int>    fNCount;
 };

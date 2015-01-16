@@ -19,7 +19,10 @@ public:
     void initialize(const std::vector<RecoObj> &iRecoObjects);
     std::vector<fastjet::PseudoJet> pfParticles(){ return fPFParticles; }    
     std::vector<fastjet::PseudoJet> pvParticles(){ return fChargedPV; }        
-    const std::vector<double> puppiWeights();
+    const std::vector<double> puppiWeights ();
+    const std::vector<double> puppiAlpha   () {return fAlpha;}
+    const std::vector<double> puppiAlphaMed() {return fAlphaMed;}
+    const std::vector<double> puppiAlphaRMS() {return fAlphaRMS;}
     std::vector<fastjet::PseudoJet> puppiParticles() { return fPupParticles;}
 
 protected:
@@ -34,6 +37,9 @@ protected:
     std::vector<PseudoJet> fChargedPV;
     std::vector<PseudoJet> fPupParticles;
     std::vector<double>    fWeights;
+    std::vector<double>    fAlpha;
+    std::vector<double>    fAlphaMed;
+    std::vector<double>    fAlphaRMS;
     std::vector<double>    fVals;
     bool   fApplyCHS;
     bool   fUseExp;
